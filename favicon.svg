@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- DEV_MASTER: 3分野のレベルゲージをアイコン化 -->
+  <rect width="64" height="64" rx="14" fill="#1a1b26"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#292e42"/>
+  <!-- frontend (orange) -->
+  <rect x="12" y="14" width="27" height="9" rx="2" fill="#ff9e64"/>
+  <rect x="42" y="14" width="10" height="9" rx="2" fill="#3b4261"/>
+  <!-- backend (green) -->
+  <rect x="12" y="27.5" width="19" height="9" rx="2" fill="#9ece6a"/>
+  <rect x="34" y="27.5" width="18" height="9" rx="2" fill="#3b4261"/>
+  <!-- infra (blue) -->
+  <rect x="12" y="41" width="33" height="9" rx="2" fill="#7aa2f7"/>
+  <rect x="48" y="41" width="4" height="9" rx="2" fill="#3b4261"/>
+</svg>
