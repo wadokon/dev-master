@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEV MASTER — スキル習熟チェックリスト</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Tokyo Night 系パレット（ダーク固定のエディタ風テーマ） */
+:root {
+  color-scheme: dark;
+  --bg: #16161e;
+  --panel: #1a1b26;
+  --panel2: #24283b;
+  --ink: #c0caf5;
+  --bright: #e6ebff;
+  --muted: #565f89;
+  --dim: #3b4261;
+  --line: #292e42;
+  --line-soft: #20253a;
+  --fe: #ff9e64;
+  --be: #9ece6a;
+  --in: #7aa2f7;
+  --cyan: #7dcfff;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+  --sans: "IBM Plex Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--sans);
+  /* 方眼グリッドの下地 */
+  background:
+    linear-gradient(rgba(122, 162, 247, .04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 162, 247, .04) 1px, transparent 1px),
+    var(--bg);
+  background-size: 28px 28px;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+  padding-bottom: 40px;
+}
+::selection { background: #33467c; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #2a2f45; border-radius: 5px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-track { background: transparent; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 2px; }
+
+/* ---------- ヘッダー ---------- */
+.wrap { max-width: 1560px; margin: 0 auto; padding: 0 24px 60px; }
+header { padding: 24px 0 16px; }
+.brand {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+}
+.brand h1 {
+  font-family: var(--mono);
+  font-size: 24px; font-weight: 600; letter-spacing: .14em;
+  color: var(--bright);
+  text-shadow: 0 0 22px rgba(122, 162, 247, .45);
+}
+.brand h1 em { font-style: normal; color: var(--cyan); }
+.brand .sub {
+  font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+  letter-spacing: .3em; text-transform: uppercase;
+}
+.brand .total {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 13px; font-weight: 600;
+  color: var(--muted);
+}
+.brand .total b { color: var(--cyan); font-size: 17px; font-weight: 600; }
+
+/* ゲージカード = タブ */
+.gauges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+.gauge {
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 11px 16px 13px;
+  transition: border-color .15s, box-shadow .15s;
+  position: relative;
+}
+.gauge:hover { border-color: color-mix(in srgb, var(--ac) 60%, var(--line)); }
+.gauge.active {
+  border-color: var(--ac);
+  box-shadow: 0 0 26px -8px var(--ac);
+}
+/* アクティブカードのHUD風コーナーブラケット */
+.gauge.active::before, .gauge.active::after {
+  content: ""; position: absolute; width: 12px; height: 12px;
+  border: 2px solid var(--ac);
+}
+.gauge.active::before { top: -5px; left: -5px; border-right: none; border-bottom: none; }
+.gauge.active::after { bottom: -5px; right: -5px; border-left: none; border-top: none; }
+.gauge .g-path { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.gauge.active .g-path { color: var(--ac); }
+.gauge .g-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.gauge .g-name { font-weight: 700; font-size: 13.5px; color: var(--bright); }
+.gauge .g-lv {
+  font-family: var(--mono); font-size: 21px; font-weight: 600; color: var(--ac);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--ac) 55%, transparent);
+}
+.gauge .g-lv small { font-size: 11px; color: var(--muted); font-weight: 500; margin-right: 2px; }
+.segbar { display: flex; gap: 2px; margin: 8px 0 7px; }
+.segbar i { flex: 1; height: 8px; border-radius: 1px; background: var(--line); }
+.segbar i.on {
+  background: var(--ac);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--ac) 60%, transparent);
+}
+.segbar i.half { background: linear-gradient(90deg, var(--ac) 50%, var(--line) 50%); }
+.gauge .g-count { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .02em; }
+
+/* ---------- ツールバー ---------- */
+.toolbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 14px 0 6px;
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg);
+  box-shadow: 0 6px 12px -8px rgba(0, 0, 0, .6);
+}
+.chips { display: flex; gap: 6px; }
+.chip {
+  font-family: var(--mono);
+  padding: 3px 10px; border-radius: 4px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-size: 12px; color: var(--muted);
+}
+.chip:hover { color: var(--ink); }
+.chip.active {
+  background: var(--cyan); border-color: var(--cyan); color: #101017; font-weight: 600;
+}
+.searchwrap {
+  flex: 1; min-width: 160px;
+  display: flex; align-items: center; gap: 7px;
+  background: var(--panel);
+  border: 1px solid var(--line); border-radius: 4px;
+  padding: 5px 11px;
+}
+.searchwrap::before { content: "/"; font-family: var(--mono); color: var(--cyan); font-size: 13px; }
+.searchwrap:focus-within { border-color: var(--cyan); }
+.search {
+  flex: 1; border: none; background: none; outline: none;
+  color: var(--ink); font: inherit; font-size: 13px;
+}
+.search::placeholder { color: var(--dim); }
+.menu { display: flex; gap: 10px; }
+.menu button { font-family: var(--mono); font-size: 12px; color: var(--muted); padding: 4px 0; }
+.menu button::before { content: "["; color: var(--dim); }
+.menu button::after { content: "]"; color: var(--dim); }
+.menu button:hover { color: var(--cyan); }
+.legend { width: 100%; font-family: var(--mono); font-size: 11px; color: var(--muted); padding-bottom: 4px; white-space: pre-wrap; }
+.legend b { font-weight: 500; color: var(--ink); }
+
+/* ---------- カテゴリ / 項目 ---------- */
+.domain-title {
+  display: flex; align-items: baseline; gap: 12px;
+  margin: 16px 0 2px;
+}
+.domain-title .dpath { font-family: var(--mono); font-size: 13px; color: var(--ac); }
+.domain-title h2 { font-size: 16px; font-weight: 700; color: var(--bright); }
+.domain-title .bar-mini { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+/* カテゴリを画面幅に応じて複数カラムで敷き詰める */
+.cats { columns: 4 330px; column-gap: 14px; margin-top: 12px; }
+.cat {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  break-inside: avoid;
+}
+.cat-head {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 13px;
+  border-bottom: 1px solid var(--line-soft);
+  background: color-mix(in srgb, var(--panel2) 40%, var(--panel));
+}
+.cat-head .cm { font-family: var(--mono); font-size: 12px; color: var(--dim); }
+.cat-head h3 { font-size: 13px; font-weight: 700; color: var(--bright); }
+.cat-head .cat-count {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap;
+}
+.cat-head .cat-count b { color: var(--ac); font-weight: 600; }
+/* ASCIIバー: 達成分(<i>)はアクセント色、未達分は暗色 */
+.abar { color: var(--dim); letter-spacing: -1px; font-style: normal; }
+.abar i { color: var(--ac); font-style: normal; }
+.items { list-style: none; font-size: 13px; }
+.item-btn {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; text-align: left;
+  padding: 4px 12px 4px 8px;
+  border-bottom: 1px solid var(--line-soft);
+  transition: background .1s;
+  line-height: 1.45;
+}
+.items li:last-child .item-btn { border-bottom: none; }
+.item-btn:hover { background: var(--panel2); }
+.item-btn .ln {
+  flex: none; width: 20px; text-align: right;
+  font-family: var(--mono); font-size: 10.5px; color: var(--dim);
+}
+.item-btn .mark {
+  flex: none; font-family: var(--mono); font-size: 12px;
+  color: var(--dim); white-space: pre;
+  transition: color .12s;
+}
+.item-btn[data-s="1"] .mark, .item-btn[data-s="2"] .mark { color: var(--ac); }
+.item-btn .lbl { flex: 1; }
+.item-btn[data-s="1"] { background: color-mix(in srgb, var(--ac) 7%, transparent); }
+.item-btn[data-s="1"]:hover { background: color-mix(in srgb, var(--ac) 13%, transparent); }
+.item-btn[data-s="2"] .lbl { color: var(--muted); }
+.item-btn[data-s="2"] .ln { color: color-mix(in srgb, var(--ac) 55%, var(--dim)); }
+
+.empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 13px; }
+
+footer { margin-top: 40px; font-size: 11.5px; color: var(--muted); text-align: center; }
+
+/* ---------- ステータスバー（vim風） ---------- */
+.statusbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  display: flex; align-items: stretch;
+  height: 26px;
+  font-family: var(--mono); font-size: 11.5px;
+  background: #101017;
+  border-top: 1px solid var(--line);
+  overflow: hidden; white-space: nowrap;
+}
+.sb-mode {
+  display: flex; align-items: center;
+  padding: 0 12px;
+  background: var(--cyan); color: #101017;
+  font-weight: 600; letter-spacing: .12em;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px;
+  color: var(--muted);
+  border-right: 1px solid var(--line);
+}
+.sb-item .abar { letter-spacing: -1px; }
+.sb-right { margin-left: auto; border-right: none; border-left: 1px solid var(--line); }
+.sb-right b { color: var(--cyan); font-weight: 600; }
+#sbSync.ok { color: var(--be); }
+#sbSync.pending { color: var(--fe); }
+#sbSync.error { color: #f7768e; }
+
+/* 閲覧専用モード（同期有効かつトークン未設定） */
+.readonly .item-btn { cursor: default; }
+.readonly #importBtn, .readonly #resetBtn { display: none; }
+.readonly .legend { visibility: hidden; }
+
+@media (max-width: 640px) {
+  .gauges { grid-template-columns: 1fr; }
+  .brand .total { margin-left: 0; width: 100%; }
+  .sb-item.sb-bar { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">
+    <h1>DEV<em>_</em>MASTER</h1>
+    <span class="sub">skill progress tracker</span>
+    <span class="total">総合 <b id="totalLv">Lv.0</b></span>
+  </div>
+  <nav class="gauges" id="gauges" aria-label="分野切り替え"></nav>
+</header>
+
+<main>
+  <div class="toolbar">
+    <div class="chips" id="chips" role="group" aria-label="状態フィルタ">
+      <button class="chip active" data-f="all">--all</button>
+      <button class="chip" data-f="0">--todo</button>
+      <button class="chip" data-f="1">--wip</button>
+      <button class="chip" data-f="2">--done</button>
+    </div>
+    <div class="searchwrap">
+      <input type="search" class="search" id="search" placeholder="grep スキル名…" aria-label="スキルを検索">
+    </div>
+    <div class="menu">
+      <button id="exportBtn" title="進捗をJSONファイルに保存">書き出し</button>
+      <button id="importBtn" title="JSONファイルから進捗を復元">読み込み</button>
+      <button id="resetBtn" title="この分野の進捗をリセット">リセット</button>
+      <button id="syncBtn" hidden title="書き込み用トークンを設定">同期</button>
+      <input type="file" id="importFile" accept=".json" hidden>
+    </div>
+    <div class="legend">click: <b>[ ]</b> 未着手 → <b>[~]</b> 学習中 (0.5pt) → <b>[x]</b> 習得済み (1pt)</div>
+  </div>
+  <section id="content"></section>
+</main>
+
+<footer>進捗はこのブラウザに自動保存されます。別環境へ移す場合は「書き出し」→「読み込み」を使ってください。</footer>
+
+</div>
+
+<div class="statusbar" role="status">
+  <span class="sb-mode">TRACKING</span>
+  <span class="sb-item" id="sbDomain"></span>
+  <span class="sb-item sb-bar" id="sbGauge"></span>
+  <span class="sb-item" id="sbSync" hidden></span>
+  <span class="sb-item sb-right" id="sbTotal"></span>
+</div>
+
+<script>
+"use strict";
+
+/* ================= スキルデータ ================= */
+const DATA = [
+{ id: "fe", name: "フロントエンド", varName: "--fe", cats: [
+  { id: "fe-html", name: "HTML / CSS", items: [
+    "セマンティックHTML（適切なタグ選択）",
+    "フォーム要素とバリデーション属性",
+    "アクセシビリティ基礎（alt / label / ランドマーク）",
+    "WAI-ARIA の適切な使用",
+    "Flexbox を自在に使える",
+    "CSS Grid を自在に使える",
+    "レスポンシブ設計（メディアクエリ / コンテナクエリ）",
+    "CSSカスタムプロパティ（変数）",
+    "詳細度とカスケードの理解",
+    "position / z-index / スタッキングコンテキスト",
+    "トランジション / キーフレームアニメーション",
+    "Sass などプリプロセッサ",
+    "CSS設計手法（BEM / FLOCSS など）",
+    "Tailwind CSS",
+    "ダークモード対応（prefers-color-scheme）"
+  ]},
+  { id: "fe-js", name: "JavaScript", items: [
+    "ES6+ 構文（分割代入 / スプレッド / テンプレートリテラル）",
+    "スコープとクロージャ",
+    "this の挙動とバインディング",
+    "プロトタイプチェーンとクラス",
+    "配列メソッド（map / filter / reduce など）を自在に使える",
+    "Promise の理解",
+    "async / await とエラーハンドリング",
+    "イベントループ（マイクロタスク / マクロタスク）",
+    "モジュールシステム（ESM / CommonJS の違い）",
+    "DOM操作とイベント（バブリング / delegation）",
+    "fetch API / AbortController",
+    "正規表現",
+    "イミュータブルなデータ操作",
+    "デバウンス / スロットリングの実装",
+    "ブラウザ開発者ツールでのデバッグ"
+  ]},
+  { id: "fe-ts", name: "TypeScript", items: [
+    "基本の型注釈と型推論",
+    "interface / type の使い分け",
+    "ユニオン型 / リテラル型",
+    "ジェネリクス",
+    "型ガードと絞り込み（narrowing）",
+    "ユーティリティ型（Partial / Pick / Omit など）",
+    "mapped types / conditional types",
+    "unknown / never / any の使い分け",
+    "tsconfig の主要オプション理解",
+    "型定義ファイル（.d.ts）の作成・利用",
+    "zod などによるランタイムバリデーションと型の連携"
+  ]},
+  { id: "fe-react", name: "React", items: [
+    "JSX とコンポーネント設計",
+    "props / state の設計",
+    "useState / useEffect の正しい使い方",
+    "useMemo / useCallback と再レンダリング最適化",
+    "useRef / DOM参照",
+    "カスタムフックの設計",
+    "Context API",
+    "制御コンポーネント / 非制御コンポーネント",
+    "リストとkeyの正しい扱い",
+    "エラーバウンダリ",
+    "Suspense / lazy loading",
+    "React Server Components の理解",
+    "コンポーネント分割の設計指針を説明できる"
+  ]},
+  { id: "fe-fw", name: "フレームワーク / エコシステム", items: [
+    "Next.js（App Router / ルーティング / データ取得）",
+    "Next.js のレンダリング戦略（SSR / SSG / ISR）の使い分け",
+    "Vue 3（Composition API）",
+    "Nuxt の基礎",
+    "状態管理ライブラリ（Zustand / Redux / Pinia など）",
+    "TanStack Query などのサーバー状態管理",
+    "React Hook Form などのフォームライブラリ",
+    "UIコンポーネントライブラリの活用（shadcn/ui / MUI など）",
+    "Svelte / Astro など他のパラダイムに触れる"
+  ]},
+  { id: "fe-build", name: "ビルド / 開発ツール", items: [
+    "npm / pnpm とpackage.jsonの理解",
+    "セマンティックバージョニングと依存関係管理",
+    "Vite の設定",
+    "webpack の基本概念（loader / plugin）",
+    "トランスパイルとポリフィルの理解",
+    "ESLint の設定",
+    "Prettier / フォーマッタの運用",
+    "husky / lint-staged などのGitフック",
+    "モノレポ管理（Turborepo / workspaces）"
+  ]},
+  { id: "fe-test", name: "テスト", items: [
+    "Vitest / Jest でのユニットテスト",
+    "Testing Library でのコンポーネントテスト",
+    "モック / スパイの使い方",
+    "E2Eテスト（Playwright / Cypress）",
+    "Storybook でのコンポーネントカタログ",
+    "ビジュアルリグレッションテスト",
+    "何をテストすべきかの判断基準を持っている"
+  ]},
+  { id: "fe-perf", name: "パフォーマンス", items: [
+    "Core Web Vitals（LCP / INP / CLS）の理解",
+    "Lighthouse / DevTools での計測と改善",
+    "コード分割 / 遅延読み込み",
+    "画像最適化（フォーマット / srcset / lazy）",
+    "フォント読み込み最適化",
+    "バンドルサイズ分析と削減",
+    "再レンダリングの特定と削減",
+    "ブラウザキャッシュ戦略（Cache-Control）",
+    "クリティカルレンダリングパスの理解"
+  ]},
+  { id: "fe-browser", name: "ブラウザ / Web API", items: [
+    "ブラウザのレンダリングの仕組み（reflow / repaint）",
+    "localStorage / sessionStorage / Cookie の使い分け",
+    "IndexedDB",
+    "Service Worker / PWA",
+    "WebSocket / SSE によるリアルタイム通信",
+    "Intersection Observer / ResizeObserver",
+    "History API / SPAのルーティングの仕組み",
+    "Canvas / SVG の基礎",
+    "Web Components の基礎",
+    "クリップボード / File / Drag&Drop API"
+  ]},
+  { id: "fe-sec", name: "セキュリティ / その他", items: [
+    "XSS の仕組みと対策",
+    "CSRF の仕組みと対策",
+    "CORS の理解（preflight含む）",
+    "Content Security Policy（CSP）",
+    "認証フロー（Cookie vs トークン / OAuth / OIDC）のフロント側実装",
+    "SEO基礎（メタタグ / 構造化データ / OGP）",
+    "i18n（多言語対応）",
+    "アナリティクス / イベント計測の実装"
+  ]}
+]},
+{ id: "be", name: "バックエンド", varName: "--be", cats: [
+  { id: "be-lang", name: "言語 / ランタイム", items: [
+    "主力言語を1つ深く使える（Node.js / PHP / Go / Python など）",
+    "Node.js のイベントループとノンブロッキングI/O",
+    "Stream / Buffer の扱い",
+    "例外設計とエラーハンドリング方針",
+    "並行処理の基礎（async / worker / goroutineなど）",
+    "メモリ管理とGCの基礎理解",
+    "標準ライブラリを把握している",
+    "第二言語で簡単なAPIを書ける",
+    "プロファイリングでボトルネックを特定できる"
+  ]},
+  { id: "be-http", name: "HTTP / API設計", items: [
+    "HTTPメソッドとステータスコードの正しい使い分け",
+    "HTTPヘッダー（キャッシュ / 認証 / コンテンツ交渉）",
+    "RESTful API 設計（リソース設計 / URL設計）",
+    "OpenAPI（Swagger）でのAPI仕様記述",
+    "ページネーション設計（offset / cursor）",
+    "APIバージョニング戦略",
+    "レートリミットの設計と実装",
+    "冪等性の設計（Idempotency-Key）",
+    "Webhook の設計（リトライ / 署名検証）",
+    "GraphQL の基礎（スキーマ / リゾルバ / N+1）",
+    "gRPC / Protocol Buffers の基礎"
+  ]},
+  { id: "be-fw", name: "フレームワーク", items: [
+    "主力フレームワークを深く使える（Laravel / NestJS / Rails など）",
+    "ルーティングとミドルウェアの仕組み",
+    "リクエストバリデーション",
+    "依存性注入（DI）の理解",
+    "ORM の活用と生SQLへの切り替え判断",
+    "設定管理（環境変数 / config分離）",
+    "フレームワークのライフサイクルを説明できる",
+    "2つ目のフレームワークにも触れている"
+  ]},
+  { id: "be-rdb", name: "データベース（RDB）", items: [
+    "SELECT / JOIN / サブクエリを自在に書ける",
+    "GROUP BY / HAVING / ウィンドウ関数",
+    "正規化とER図の設計",
+    "インデックス設計（複合 / カバリング）",
+    "実行計画（EXPLAIN）の読み方と改善",
+    "トランザクションと分離レベル",
+    "ロックとデッドロックの理解",
+    "N+1問題の検出と対策",
+    "マイグレーションの運用（後方互換 / ロールバック）",
+    "コネクションプーリング",
+    "レプリケーション（リードレプリカ）の活用",
+    "パーティショニング / シャーディングの基礎",
+    "大量データのバッチ処理設計"
+  ]},
+  { id: "be-nosql", name: "NoSQL / キャッシュ / 検索", items: [
+    "Redis（データ構造 / TTL / 永続化）",
+    "キャッシュ戦略（cache-aside / write-through）",
+    "キャッシュ無効化の設計",
+    "セッションストアとしてのRedis活用",
+    "MongoDB などドキュメントDBの基礎",
+    "DynamoDB などKVSの設計（パーティションキー）",
+    "Elasticsearch / 全文検索の基礎",
+    "RDBとNoSQLの使い分けを説明できる"
+  ]},
+  { id: "be-auth", name: "認証 / 認可", items: [
+    "セッション認証とトークン認証の違い・使い分け",
+    "パスワードハッシュ（bcrypt / argon2）",
+    "JWT の仕組みと注意点（保存場所 / 失効）",
+    "OAuth 2.0 のフロー（認可コード / PKCE）",
+    "OpenID Connect の理解",
+    "リフレッシュトークンの設計",
+    "RBAC / ABAC による認可設計",
+    "多要素認証（MFA）の実装",
+    "SSO / SAML の基礎",
+    "アカウント周りの攻撃対策（総当たり / 列挙）"
+  ]},
+  { id: "be-async", name: "非同期処理 / メッセージング", items: [
+    "ジョブキュー（BullMQ / Sidekiq / SQSなど）の活用",
+    "cron / スケジューラ設計",
+    "リトライ設計（指数バックオフ / 上限）",
+    "デッドレターキューの運用",
+    "Pub/Sub パターン",
+    "Kafka などのイベントストリーミング基礎",
+    "メッセージの重複・順序保証の理解（at-least-once など）",
+    "分散トランザクション / Sagaパターンの基礎",
+    "長時間処理の設計（進捗管理 / タイムアウト）"
+  ]},
+  { id: "be-arch", name: "設計 / アーキテクチャ", items: [
+    "レイヤードアーキテクチャでの責務分離",
+    "クリーンアーキテクチャ / ヘキサゴナルの理解",
+    "DDD の基礎（エンティティ / 値オブジェクト / 集約）",
+    "SOLID原則を実践できる",
+    "デザインパターンの主要どころを使える",
+    "モノリス vs マイクロサービスの判断基準",
+    "イベント駆動アーキテクチャ",
+    "CQRS の基礎",
+    "12 Factor App",
+    "設計ドキュメント（ADR / 設計書）を書ける",
+    "ドメインモデリングをリードできる"
+  ]},
+  { id: "be-test", name: "テスト / 品質", items: [
+    "ユニットテストの習慣化",
+    "統合テスト（DB / 外部API含む）",
+    "モック / スタブ / フェイクの使い分け",
+    "テストデータ管理（ファクトリ / フィクスチャ）",
+    "テストカバレッジの適切な扱い",
+    "TDD を実践できる",
+    "契約テスト（API間）の基礎",
+    "負荷テスト（k6 / JMeter）",
+    "コードレビューで設計面の指摘ができる"
+  ]},
+  { id: "be-sec", name: "セキュリティ", items: [
+    "SQLインジェクション対策",
+    "OWASP Top 10 を説明できる",
+    "入力検証と出力エスケープの原則",
+    "秘密情報の管理（環境変数 / シークレットストア）",
+    "依存パッケージの脆弱性管理",
+    "セキュアなファイルアップロード処理",
+    "SSRF の理解と対策",
+    "監査ログの設計",
+    "個人情報の扱い（マスキング / 暗号化）"
+  ]},
+  { id: "be-ops", name: "運用 / 可観測性", items: [
+    "構造化ログの設計（レベル / コンテキスト）",
+    "メトリクス収集（RED / USE）",
+    "分散トレーシング（OpenTelemetry）",
+    "エラー監視（Sentryなど）の導入・運用",
+    "ヘルスチェックエンドポイントの設計",
+    "グレースフルシャットダウン",
+    "フィーチャーフラグの運用",
+    "障害調査（ログ / メトリクスからの原因特定）",
+    "パフォーマンスチューニングの実績がある"
+  ]}
+]},
+{ id: "in", name: "インフラ", varName: "--in", cats: [
+  { id: "in-linux", name: "Linux / OS", items: [
+    "基本コマンド操作（ファイル / テキスト処理 / パイプ）",
+    "パーミッションとユーザー / グループ管理",
+    "プロセス管理とシグナル",
+    "systemd でのサービス管理",
+    "パッケージ管理（apt / yum）",
+    "シェルスクリプトが書ける",
+    "ログの調査（journald / /var/log）",
+    "リソース調査（top / free / df / iostat）",
+    "ネットワーク調査（ss / ip / dig / curl）",
+    "cron の設定と運用",
+    "SSH の設定と鍵管理"
+  ]},
+  { id: "in-net", name: "ネットワーク", items: [
+    "TCP/IP の基礎（3wayハンドシェイク / ポート）",
+    "DNS の仕組み（レコード種別 / TTL / 委任）",
+    "HTTP/1.1 / HTTP/2 / HTTP/3 の違い",
+    "TLS証明書の仕組みと更新運用",
+    "ロードバランサ（L4 / L7）の理解",
+    "CDN の仕組みとキャッシュ制御",
+    "サブネット / CIDR の計算",
+    "NAT / ルーティングの基礎",
+    "ファイアウォール / セキュリティグループ設計",
+    "VPN / 踏み台構成の理解",
+    "パケットキャプチャでの調査（tcpdump）"
+  ]},
+  { id: "in-web", name: "Webサーバー", items: [
+    "Nginx の基本設定（server / location）",
+    "リバースプロキシ設定",
+    "TLS終端の設定（Let's Encrypt含む）",
+    "gzip / brotli 圧縮設定",
+    "キャッシュ設定",
+    "レートリミット / アクセス制限",
+    "アクセスログの解析",
+    "Apache との違いを説明できる"
+  ]},
+  { id: "in-container", name: "コンテナ", items: [
+    "Docker の基本操作（build / run / volume / network）",
+    "Dockerfile のベストプラクティス（レイヤ / キャッシュ）",
+    "マルチステージビルド",
+    "docker compose での複数コンテナ管理",
+    "イメージレジストリの運用（ECRなど）",
+    "コンテナのセキュリティ（非root / イメージスキャン）",
+    "Kubernetes の基礎（Pod / Deployment / Service）",
+    "Kubernetes の設定管理（ConfigMap / Secret）",
+    "Ingress / オートスケールの設定",
+    "Helm の基礎"
+  ]},
+  { id: "in-cloud", name: "クラウド（AWS中心）", items: [
+    "IAM（ポリシー / ロール / 最小権限）",
+    "VPC 設計（サブネット / ルートテーブル / NAT）",
+    "EC2 の運用（AMI / セキュリティグループ）",
+    "S3（バケットポリシー / ライフサイクル / 署名付きURL）",
+    "RDS / Aurora の運用（バックアップ / フェイルオーバー）",
+    "Lambda / サーバーレスの設計",
+    "API Gateway",
+    "ECS / Fargate でのコンテナ運用",
+    "CloudFront + S3 の配信構成",
+    "Route 53 でのDNS管理",
+    "SQS / SNS / EventBridge",
+    "CloudWatch（ログ / メトリクス / アラーム）",
+    "コスト管理（Cost Explorer / 予算アラート）",
+    "他クラウド（GCP / Cloudflare / Supabaseなど）にも触れる"
+  ]},
+  { id: "in-iac", name: "IaC（Infrastructure as Code）", items: [
+    "Terraform の基礎（resource / variable / output）",
+    "Terraform の状態管理（remote state / lock）",
+    "Terraform のモジュール化",
+    "plan / apply を安全に運用できる（差分レビュー）",
+    "CloudFormation / CDK の基礎",
+    "Ansible などの構成管理ツール",
+    "既存インフラのコード化（import）",
+    "IaC のCI組み込み"
+  ]},
+  { id: "in-cicd", name: "CI/CD", items: [
+    "GitHub Actions のワークフロー作成",
+    "テスト / Lint の自動実行パイプライン",
+    "ビルド成果物・キャッシュの管理",
+    "シークレットの安全な受け渡し（OIDC連携）",
+    "ブランチ戦略とデプロイフローの設計",
+    "自動デプロイ（ステージング / 本番）",
+    "Blue/Green・カナリアデプロイの理解",
+    "ロールバック手順の整備",
+    "デプロイ通知 / リリースノートの自動化"
+  ]},
+  { id: "in-monitor", name: "監視 / 運用", items: [
+    "監視設計（何を監視すべきかの判断）",
+    "SLI / SLO の設定",
+    "アラート設計（ノイズを減らす閾値設定）",
+    "ダッシュボード作成（Grafana / CloudWatch）",
+    "ログ集約基盤の構築・運用",
+    "死活監視 / 外形監視",
+    "インシデント対応フロー（一次対応 / エスカレーション）",
+    "ポストモーテム（振り返り）の実施",
+    "バックアップとリストア演習",
+    "DR（災害復旧）設計 / RTO・RPO の理解",
+    "キャパシティプランニング"
+  ]},
+  { id: "in-sec", name: "セキュリティ", items: [
+    "最小権限の原則を実践できる",
+    "ネットワークの多層防御設計",
+    "WAF の導入・運用",
+    "シークレット管理（Secrets Manager / Vault）",
+    "脆弱性スキャンの運用（OS / コンテナ / 依存）",
+    "セキュリティパッチ適用の運用",
+    "証明書 / 鍵のローテーション",
+    "監査ログ（CloudTrailなど）の有効化と活用",
+    "ゼロトラストの考え方を説明できる"
+  ]}
+]}
+];
+
+/* ================= 同期設定（案C: Cloudflare Workers） ================= */
+/* WorkerをデプロイしたらURLを設定する（空文字ならローカル単体モードで動く）
+   例: const SYNC_URL = "https://devmaster-api.xxxx.workers.dev"; */
+const SYNC_URL = "https://devmaster-api.xxxx.workers.dev";
+const TOKEN_KEY = "devmaster-token";
+const syncEnabled = SYNC_URL !== "";
+let token = localStorage.getItem(TOKEN_KEY) || "";
+const canWrite = () => !syncEnabled || token !== "";
+
+/* ================= 状態管理 ================= */
+const STORE_KEY = "devmaster-v1";
+const TAB_KEY = "devmaster-tab";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { state = {}; }
+let activeTab = localStorage.getItem(TAB_KEY) || "fe";
+if (!DATA.some(d => d.id === activeTab)) activeTab = "fe";
+let filter = "all";
+let query = "";
+
+const keyOf = (catId, label) => catId + "::" + label;
+const getS = (catId, label) => state[keyOf(catId, label)] | 0;
+function setS(catId, label, v) {
+  const k = keyOf(catId, label);
+  if (v === 0) delete state[k]; else state[k] = v;
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  schedulePush();
+}
+
+/* ---- サーバー同期 ---- */
+let pushTimer = null;
+let warned401 = false;
+function setSyncStatus(s) {
+  const el = $("#sbSync");
+  if (!el) return;
+  el.className = "sb-item " + s;
+  el.textContent = s === "ok" ? "SYNC ✓" : s === "pending" ? "SYNC …" : "SYNC ✗";
+}
+function schedulePush() {
+  if (!syncEnabled || !token) return;
+  setSyncStatus("pending");
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(pushState, 800);
+}
+async function pushState() {
+  if (!syncEnabled || !token) return;
+  try {
+    const res = await fetch(SYNC_URL, {
+      method: "PUT",
+      headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify(state)
+    });
+    setSyncStatus(res.ok ? "ok" : "error");
+    if (res.status === 401 && !warned401) {
+      warned401 = true;
+      alert("同期トークンが正しくありません。［同期］ボタンから設定し直してください。");
+    }
+  } catch (e) {
+    setSyncStatus("error");
+  }
+}
+/* 起動時にサーバーの進捗を取得（サーバーが空で手元にデータがあれば初回アップロード） */
+async function initSync() {
+  if (!syncEnabled) return;
+  try {
+    const res = await fetch(SYNC_URL, { cache: "no-store" });
+    const remote = await res.json();
+    if (remote && typeof remote === "object" && !Array.isArray(remote)) {
+      if (Object.keys(remote).length > 0) {
+        state = remote;
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      } else if (token && Object.keys(state).length > 0) {
+        pushState();
+      }
+      setSyncStatus("ok");
+    }
+  } catch (e) {
+    setSyncStatus("error");
+  }
+}
+
+/* 集計: {done, learning, total, pt(重み付き%)} */
+function statsOf(items, catId) {
+  let done = 0, learning = 0;
+  for (const label of items) {
+    const s = getS(catId, label);
+    if (s === 2) done++; else if (s === 1) learning++;
+  }
+  const total = items.length;
+  const pt = total ? (done + learning * 0.5) / total * 100 : 0;
+  return { done, learning, total, pt };
+}
+function domainStats(domain) {
+  let done = 0, learning = 0, total = 0;
+  for (const c of domain.cats) {
+    const s = statsOf(c.items, c.id);
+    done += s.done; learning += s.learning; total += s.total;
+  }
+  const pt = total ? (done + learning * 0.5) / total * 100 : 0;
+  return { done, learning, total, pt };
+}
+
+/* ================= 描画 ================= */
+const $ = sel => document.querySelector(sel);
+const gaugesEl = $("#gauges"), contentEl = $("#content");
+const SLUG = { fe: "frontend", be: "backend", in: "infra" };
+
+/* ASCIIプログレスバー（█░）達成分を<i>で囲んで色分け */
+function asciiBar(pt, n) {
+  const f = Math.round(pt / 100 * n);
+  return `<i>${"█".repeat(f)}</i>${"░".repeat(n - f)}`;
+}
+
+function segbarHTML(pt, n) {
+  const filled = pt / 100 * n;
+  let html = "";
+  for (let i = 0; i < n; i++) {
+    const cls = i + 1 <= Math.floor(filled) ? "on" : (i < filled ? "half" : "");
+    html += `<i class="${cls}"></i>`;
+  }
+  return html;
+}
+
+function renderGauges() {
+  gaugesEl.innerHTML = "";
+  let allDone = 0, allLearning = 0, allTotal = 0;
+  for (const d of DATA) {
+    const s = domainStats(d);
+    allDone += s.done; allLearning += s.learning; allTotal += s.total;
+    const btn = document.createElement("button");
+    btn.className = "gauge" + (d.id === activeTab ? " active" : "");
+    btn.style.setProperty("--ac", `var(${d.varName})`);
+    btn.setAttribute("aria-pressed", d.id === activeTab);
+    btn.innerHTML = `
+      <div class="g-path">~/${SLUG[d.id]}</div>
+      <div class="g-head">
+        <span class="g-name">${d.name}</span>
+        <span class="g-lv"><small>Lv.</small>${Math.round(s.pt)}</span>
+      </div>
+      <div class="segbar" aria-hidden="true">${segbarHTML(s.pt, 20)}</div>
+      <div class="g-count">習得 ${s.done} · 学習中 ${s.learning} · 全 ${s.total}</div>`;
+    btn.addEventListener("click", () => {
+      activeTab = d.id;
+      localStorage.setItem(TAB_KEY, activeTab);
+      renderGauges(); renderContent();
+    });
+    gaugesEl.appendChild(btn);
+  }
+  const totalPt = allTotal ? (allDone + allLearning * 0.5) / allTotal * 100 : 0;
+  $("#totalLv").textContent = "Lv." + Math.round(totalPt);
+
+  /* ステータスバー更新 */
+  const ad = DATA.find(d => d.id === activeTab);
+  const ds = domainStats(ad);
+  const sd = $("#sbDomain");
+  sd.textContent = `~/${SLUG[ad.id]}  Lv.${Math.round(ds.pt)}`;
+  sd.style.color = `var(${ad.varName})`;
+  $("#sbGauge").innerHTML = `<span class="abar" style="--ac:var(${ad.varName})">${asciiBar(ds.pt, 14)}</span> ${Math.round(ds.pt)}%`;
+  $("#sbTotal").innerHTML = `総合 ${allDone}/${allTotal} 習得 · <b>Lv.${Math.round(totalPt)}</b>`;
+}
+
+function matches(catId, label) {
+  const s = getS(catId, label);
+  if (filter !== "all" && s !== Number(filter)) return false;
+  if (query && !label.toLowerCase().includes(query)) return false;
+  return true;
+}
+
+function renderContent() {
+  const domain = DATA.find(d => d.id === activeTab);
+  contentEl.innerHTML = "";
+  const ds = domainStats(domain);
+
+  const title = document.createElement("div");
+  title.className = "domain-title";
+  title.style.setProperty("--ac", `var(${domain.varName})`);
+  title.innerHTML = `<span class="dpath">~/${SLUG[domain.id]}</span><h2>${domain.name}</h2><span class="bar-mini">${ds.done + ds.learning}/${ds.total} 着手 · Lv.${Math.round(ds.pt)}</span>`;
+  contentEl.appendChild(title);
+
+  const catsWrap = document.createElement("div");
+  catsWrap.className = "cats";
+  contentEl.appendChild(catsWrap);
+
+  let shown = 0;
+  for (const cat of domain.cats) {
+    const visible = cat.items.filter(l => matches(cat.id, l));
+    if (visible.length === 0) continue;
+    shown += visible.length;
+    const s = statsOf(cat.items, cat.id);
+
+    const sec = document.createElement("section");
+    sec.className = "cat";
+    sec.style.setProperty("--ac", `var(${domain.varName})`);
+    sec.innerHTML = `
+      <div class="cat-head">
+        <span class="cm">//</span>
+        <h3>${cat.name}</h3>
+        <span class="cat-count"><span class="abar">${asciiBar(s.pt, 6)}</span> <b>${s.done}</b>/${s.total}${s.learning ? ` ~${s.learning}` : ""}</span>
+      </div>
+      <ul class="items"></ul>`;
+    const ul = sec.querySelector(".items");
+
+    for (const label of visible) {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      const st = getS(cat.id, label);
+      btn.className = "item-btn";
+      btn.dataset.s = st;
+      const ln = String(cat.items.indexOf(label) + 1).padStart(2, "0");
+      btn.innerHTML = `<span class="ln" aria-hidden="true">${ln}</span><span class="mark" aria-hidden="true"></span><span class="lbl">${label}</span>`;
+      updateItemBtn(btn, label, st);
+      btn.addEventListener("click", () => {
+        if (!canWrite()) return;
+        const next = ((Number(btn.dataset.s) + 1) % 3);
+        setS(cat.id, label, next);
+        btn.dataset.s = next;
+        updateItemBtn(btn, label, next);
+        /* カテゴリのカウント表示だけ更新（行は残す） */
+        const ns = statsOf(cat.items, cat.id);
+        sec.querySelector(".cat-count").innerHTML = `<span class="abar">${asciiBar(ns.pt, 6)}</span> <b>${ns.done}</b>/${ns.total}${ns.learning ? ` ~${ns.learning}` : ""}`;
+        renderGauges();
+        const t = contentEl.querySelector(".bar-mini");
+        const nds = domainStats(domain);
+        if (t) t.textContent = `${nds.done + nds.learning}/${nds.total} 着手 · Lv.${Math.round(nds.pt)}`;
+      });
+      li.appendChild(btn);
+      ul.appendChild(li);
+    }
+    catsWrap.appendChild(sec);
+  }
+  if (shown === 0) {
+    const p = document.createElement("p");
+    p.className = "empty";
+    p.textContent = "該当するスキルがありません";
+    contentEl.appendChild(p);
+  }
+}
+
+const ST_NAME = ["未着手", "学習中", "習得済み"];
+const ST_MARK = ["[ ]", "[~]", "[x]"];
+function updateItemBtn(btn, label, s) {
+  btn.querySelector(".mark").textContent = ST_MARK[s];
+  btn.setAttribute("aria-label", `${label}（${ST_NAME[s]}）クリックで状態を切替`);
+}
+
+/* ================= ツールバー ================= */
+$("#chips").addEventListener("click", e => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  filter = chip.dataset.f;
+  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c === chip));
+  renderContent();
+});
+$("#search").addEventListener("input", e => {
+  query = e.target.value.trim().toLowerCase();
+  renderContent();
+});
+
+$("#exportBtn").addEventListener("click", () => {
+  const payload = { app: "devmaster", version: 1, exportedAt: new Date().toISOString(), state };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `devmaster-progress-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+$("#importBtn").addEventListener("click", () => $("#importFile").click());
+$("#importFile").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const payload = JSON.parse(reader.result);
+      const st = payload && payload.app === "devmaster" ? payload.state : payload;
+      if (!st || typeof st !== "object" || Array.isArray(st)) throw new Error("形式が不正");
+      for (const v of Object.values(st)) {
+        if (v !== 1 && v !== 2) throw new Error("形式が不正");
+      }
+      state = st;
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      schedulePush();
+      renderGauges(); renderContent();
+      alert("進捗を読み込みました。");
+    } catch (err) {
+      alert("読み込みに失敗しました。DEV MASTERで書き出したJSONファイルを選択してください。");
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+$("#resetBtn").addEventListener("click", () => {
+  const domain = DATA.find(d => d.id === activeTab);
+  if (!confirm(`「${domain.name}」の進捗をすべてリセットします。よろしいですか？`)) return;
+  for (const cat of domain.cats) {
+    for (const label of cat.items) delete state[keyOf(cat.id, label)];
+  }
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  schedulePush();
+  renderGauges(); renderContent();
+});
+
+$("#syncBtn").addEventListener("click", () => {
+  const t = prompt("書き込み用トークンを入力してください（空欄で決定すると閲覧専用に戻ります）", token);
+  if (t === null) return;
+  token = t.trim();
+  warned401 = false;
+  if (token) localStorage.setItem(TOKEN_KEY, token);
+  else localStorage.removeItem(TOKEN_KEY);
+  applyMode();
+  if (token) pushState();
+});
+
+/* 書き込み可否に応じたUI切り替え */
+function applyMode() {
+  document.body.classList.toggle("readonly", !canWrite());
+  $("#syncBtn").hidden = !syncEnabled;
+  $("#sbSync").hidden = !syncEnabled;
+  document.querySelector(".sb-mode").textContent = canWrite() ? "TRACKING" : "VIEWING";
+}
+
+/* ================= 初期化 ================= */
+applyMode();
+initSync().then(() => {
+  renderGauges();
+  renderContent();
+});
+</script>
+</body>
+</html>

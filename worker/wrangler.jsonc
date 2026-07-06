@@ -1,0 +1,12 @@
+{
+  // DEV_MASTER 進捗同期APIの設定
+  "name": "devmaster-api",
+  "main": "worker.js",
+  "compatibility_date": "2026-07-01",
+  "kv_namespaces": [
+    {
+      "binding": "PROGRESS",
+      "id": "115169c21f59437fa84f2b69a2ef2d17"
+    }
+  ]
+}
