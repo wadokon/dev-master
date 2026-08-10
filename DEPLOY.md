@@ -30,23 +30,23 @@
 ソース（スキル一覧）が公開されて問題なければこちらが最短です。
 
 ```powershell
-cd C:\Users\USER\Desktop\dev-master\skill-checklist
+cd dev-master\skill-checklist
 
 # 1. Gitリポジトリ化
 git init
 git add index.html DEPLOY.md
 git commit -m "ADD: スキル習熟チェックリストを作成"
 
-# 2. GitHubにリポジトリを作成してpush（個人アカウント xxxx で）
-gh repo create xxxx/dev-master --public --source=. --push
+# 2. GitHubにリポジトリを作成してpush（個人アカウント wadokon で）
+gh repo create wadokon/dev-master --public --source=. --push
 ```
 
 3. GitHubのリポジトリページ → **Settings → Pages** →
    Source: `Deploy from a branch`、Branch: `main` / `(root)` を選択して Save
-4. 数分後 `https://xxxx.github.io/dev-master/` で公開されます
+4. 数分後 `https://wadokon.github.io/dev-master/` で公開されます
 
-> コミット時の注意: グローバル設定（xxxx / noreplyメール）のままコミットすること。
-> `git config --get user.email` が `276261923+xxxx@users.noreply.github.com` であることを確認。
+> コミット時の注意: グローバル設定（wadokon / noreplyメール）のままコミットすること。
+> `git config --get user.email` が `276261923+wadokon@users.noreply.github.com` であることを確認。
 
 ### A-2. Cloudflare Pages の場合（非公開リポジトリでもOK・無料）
 
@@ -102,7 +102,7 @@ Cloudflare Workers 無料プラン: 10万リクエスト/日、KV: 読み取り1
 事前準備: Node.js と Cloudflareアカウント（無料）
 
 ```powershell
-cd C:\Users\USER\Desktop\dev-master\skill-checklist\worker
+cd dev-master\skill-checklist\worker
 
 # 1. Cloudflareにログイン（ブラウザが開く）
 npx wrangler login

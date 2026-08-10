@@ -3,7 +3,7 @@
 フロントエンド・バックエンド・インフラの3分野、約300項目のスキルを
 「未着手 → 学習中 → 習得済み」の3段階で管理するチェックリストWebアプリ。
 
-**Demo: https://xxxx.github.io/dev-master/**
+**Demo: https://wadokon.github.io/dev-master/**
 
 ![status](https://img.shields.io/badge/frontend-106%20items-ff9e64)
 ![status](https://img.shields.io/badge/backend-106%20items-9ece6a)
@@ -41,7 +41,7 @@ DEPLOY.md           公開・同期セットアップの詳細手順
 
 ## 使い方
 
-1. https://xxxx.github.io/dev-master/ を開く（またはこのリポジトリを clone して `index.html` を開く）
+1. https://wadokon.github.io/dev-master/ を開く（またはこのリポジトリを clone して `index.html` を開く）
 2. 項目をクリックして状態を切り替える
 3. 進捗は自動保存。「書き出し / 読み込み」でJSONバックアップも可能
 
