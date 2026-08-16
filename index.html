@@ -696,7 +696,7 @@ const DATA = [
 /* ================= 同期設定（案C: Cloudflare Workers） ================= */
 /* WorkerをデプロイしたらURLを設定する（空文字ならローカル単体モードで動く）
    例: const SYNC_URL = "https://devmaster-api.xxxx.workers.dev"; */
-const SYNC_URL = "";
+const SYNC_URL = "https://devmaster-api.wadokon.workers.dev";
 const TOKEN_KEY = "devmaster-token";
 const syncEnabled = SYNC_URL !== "";
 let token = localStorage.getItem(TOKEN_KEY) || "";
